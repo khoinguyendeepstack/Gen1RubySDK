@@ -65,6 +65,7 @@ For a working example of usage, please visit [Globally Paid Ruby SDK example](ht
 ## Initialize the Client
 
 ``` ruby
+
 gateway = ActiveMerchant::Billing::Deepstack.new(
   :client_id => 'clientID',
   :api_username => 'username',
