@@ -6,6 +6,7 @@ require 'uri'
 require 'net/http'
 require 'net/https'
 
+# require 'active_merchant/lib/active_merchant/billing/gateway.rb'
 
 module ActiveMerchant #nodoc
     module Billing
@@ -32,6 +33,11 @@ module ActiveMerchant #nodoc
             end
 
             # Get token representing card data
+            # Arguments: 
+            #   creditCard: ActiveMerchant card object
+            #   options: List of fields not listed in creditCard
+            # Output:
+            #   response.params["clienttransdescription"]: contains result token
             def getToken(creditCard, options={})
                 params = {}
                 params = addCredentials(params)
@@ -40,10 +46,18 @@ module ActiveMerchant #nodoc
                 if options.key?(:employee_id)
                     params = addEmployeeID(params, options)
                 end
-                # puts params
                 commit(params)
             end
 
+            # Authorize transaction using either CreditCard or token
+            # Arguments:
+            #   amount: amount to authorize in dollar format
+            #   paymentInstrument: either a CreditCard object or string for token
+            #   options: hash of required and optional fields for authorization
+            # Output:
+            #   response.params["anatransactionid"] : transaction ID used for refund/charge
+            #   response.params["responsecode"] : "00" for success
+            #   response.params["responsetext"] : transaction message (either successful or reason why not)
             def authorize(amount, paymentInstrument, options={})
                 params = {}
                 params = addCredentials(params)
@@ -63,6 +77,14 @@ module ActiveMerchant #nodoc
                 commit(params)
             end
 
+            # Refund amount based on transactionID
+            # Arguments:
+            #   amount: amount to refund in dollar format
+            #   transactionID: Identifier used for transaction
+            #   options: hash of required and optional fields for authorization
+            # Output:
+            #   response.params["responsecode"] : "00" for success
+            #   response.params["responsetext"] : transaction message (either successful or reason why not)
             def refund(amount, transactionID, options = {})
                 params = {}
                 params = addCredentials(params)
@@ -73,6 +95,14 @@ module ActiveMerchant #nodoc
                 commit(params)
             end
 
+            # Capture authorized amount based on transactionID
+            # Arguments:
+            #   amount: amount to refund in dollar format
+            #   transactionID: Identifier used for transaction
+            #   options: hash of required and optional fields for authorization
+            # Output:
+            #   response.params["responsecode"] : "00" for success
+            #   response.params["responsetext"] : transaction message (either successful or reason why not)
             def capture(amount, transactionID, options = {})
                 params = {}
                 params = addCredentials(params)
@@ -169,14 +199,15 @@ module ActiveMerchant #nodoc
             def addPaymentInstrument(paymentInstrument, options)
                 if paymentInstrument.instance_of?(CreditCard)
                     {
+                        # Required Fields
                         :ccnumber => paymentInstrument.number,
                         :ccexp => "%02d%02d" % [paymentInstrument.month, paymentInstrument.year],
                         :cvv => paymentInstrument.verification_value,
                         :CCHolderFirstName => paymentInstrument.first_name,
                         :CCHolderLastName => paymentInstrument.last_name,
+                        :CCBillingAddress => options[:card_billing_address],
+                        :CCBillingZip => options[:card_billing_zipcode],
                         # Deepstack specific fields (not in CreditCard class)
-                        :CCBillingAddress => options.key?(:card_billing_address) ? options[:card_billing_address] : "",
-                        :CCBillingZip => options.key?(:card_billing_zipcode) ? options[:card_billing_zipcode] : "",
                         :CCBillingCity => options.key?(:card_billing_city) ? options[:card_billing_city] : "",
                         :CCBillingState => options.key?(:card_billing_state) ? options[:card_billing_state] : "",
                         :CCBillingCountry => options.key?(:card_billing_country) ? options[:card_billing_country] : ""
@@ -185,11 +216,13 @@ module ActiveMerchant #nodoc
                     {
                         :ccnumber => paymentInstrument,
                         :ccexp => options[:ccexp],
+                        :CCBillingAddress => options[:card_billing_address],
+                        :CCBillingZip => options[:card_billing_zipcode],
                         # :CCBillingAddress => options.key?(:card_billing_address) ? options[:card_billing_address] : "",
-                        :CCBillingZip => options.key?(:card_billing_zipcode) ? options[:card_billing_zipcode] : "",
-                        # :CCBillingCity => options.key?(:card_billing_city) ? options[:card_billing_city] : "",
-                        # :CCBillingState => options.key?(:card_billing_state) ? options[:card_billing_state] : "",
-                        # :CCBillingCountry => options.key?(:card_billing_country) ? options[:card_billing_country] : ""
+                        # :CCBillingZip => options.key?(:card_billing_zipcode) ? options[:card_billing_zipcode] : "",
+                        :CCBillingCity => options.key?(:card_billing_city) ? options[:card_billing_city] : "",
+                        :CCBillingState => options.key?(:card_billing_state) ? options[:card_billing_state] : "",
+                        :CCBillingCountry => options.key?(:card_billing_country) ? options[:card_billing_country] : ""
                     }
                 end
             end

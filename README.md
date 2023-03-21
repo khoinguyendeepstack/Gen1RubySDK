@@ -104,14 +104,15 @@ token = response.params["clienttransdescription"]
 ```
 
 ### Authorization
-
+Authorization with card
 ```ruby
 options = {
-  #optional fields
-  #Defaulted to ""
-  :employee_id = 'employee_id',
+  # Required fields
   :card_billing_address = 'card_billing_address',
   :card_billing_zipcode = 'card_billing_zipcode',
+  # optional fields
+  # Defaulted to ""
+  :employee_id = 'employee_id',
   :card_billing_city = 'some city',
   :card_billing_state = 'CA',
   :card_billing_country = 'US'
@@ -147,6 +148,45 @@ avsResponse = response.params["avsresponse"]
 # Transaction ID
 transactionID = response.params["anatransactionid"]
 ```
+
+Authorization with token
+
+```ruby
+options = {
+  # Required
+  :ccexp => "mmYY", #card expiration in mmYY
+  :card_billing_address = 'card_billing_address',
+  :card_billing_zipcode = 'card_billing_zipcode',
+  # Optional fields
+  #Defaulted to ""
+  :employee_id = 'employee_id',
+  :card_billing_city = 'some city',
+  :card_billing_state = 'CA',
+  :card_billing_country = 'US'
+  #shipping defaulted to ""
+  :shipping =>{
+    :first_name => 'John',
+    :last_name => 'Doe',
+    :city => 'some city',
+    :zip => '12345',
+    :country => 'US',
+    :phone => '1234567890',
+    :email => 'johnDoe@gmail.com'
+  },
+  #Default value "y"
+  :avs => 'y',
+  #Default Values "USD"
+  :iso_country_code => "USD",
+  :iso_currency_code => "USD",
+  #Optional internal fields
+  :client_info => {
+    :trans_id => '12345',
+    :invoice_id => '6789',
+    :client_trans_description => 'testing'
+  }
+}
+```
+
 ### Capture
 
 ``` ruby
