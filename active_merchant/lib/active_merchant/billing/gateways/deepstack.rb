@@ -56,7 +56,7 @@ module ActiveMerchant #nodoc
                 if options.key?(:shipping)
                     params = addShipping(params, options)
                 end
-                if options.key?(:clientInfo)
+                if options.key?(:client_info)
                     params = addClient(params, options)
                 end
                 # puts params.to_json
@@ -69,12 +69,18 @@ module ActiveMerchant #nodoc
                 params = addAmount(params, amount, options)
                 params = addTransactionType(params, "refund")
                 params = addTransactionID(params, transactionID)
-                puts params.to_json
+                # puts params.to_json
                 commit(params)
             end
 
-            def capture()
-
+            def capture(amount, transactionID, options = {})
+                params = {}
+                params = addCredentials(params)
+                params = addAmount(params, amount, options)
+                params = addTransactionType(params, "capture")
+                params = addTransactionID(params, transactionID)
+                puts params.to_json
+                commit(params)
             end
 
             # Take params -> create request -> send request
@@ -90,9 +96,17 @@ module ActiveMerchant #nodoc
                     req = Net::HTTP::Post.new(uri.path, init_header = headers)
                     req.body = URI.encode_www_form(params)
                     response = https.request(req)
-                    puts response.body
+                    if response.code != "200"
+                        raise "Bad request... code:  " + response.code + " message: " + response.message
+                    end
+                    # puts response.body
                     oResponse = parseResponse(response)
-                    puts oResponse
+                    # puts oResponse
+                    Response.new(
+                        success_from(response),
+                        message_from(response),
+                        JSON.parse(oResponse)
+                    )
 
                 rescue ResponseError => e
                     puts "ruh roh"
@@ -108,7 +122,7 @@ module ActiveMerchant #nodoc
             end
 
             def addClient(params, options)
-                client = options[:clientInfo]
+                client = options[:client_info]
                 params.merge({
                     :clienttransid => client.key?(:trans_id) ? client[:trans_id] : "",
                     :clientinvoiceid => client.key?(:invoice_id) ? client[:invoice_id] : "",
@@ -155,18 +169,27 @@ module ActiveMerchant #nodoc
             def addPaymentInstrument(paymentInstrument, options)
                 if paymentInstrument.instance_of?(CreditCard)
                     {
-                    :ccnumber => paymentInstrument.number,
-                    :ccexp => "%02d%02d" % [paymentInstrument.month, paymentInstrument.year],
-                    :cvv => paymentInstrument.verification_value,
-                    :CCHolderFirstName => paymentInstrument.first_name,
-                    :CCHolderLastName => paymentInstrument.last_name,
-                    # Deepstack specific fields (not in CreditCard class)
-                    :CCBillingAddress => options.key?(:card_billing_address) ? options[:card_billing_address] : "",
-                    :CCBillingZip => options.key?(:card_billing_zipcode) ? options[:card_billing_zipcode] : ""
+                        :ccnumber => paymentInstrument.number,
+                        :ccexp => "%02d%02d" % [paymentInstrument.month, paymentInstrument.year],
+                        :cvv => paymentInstrument.verification_value,
+                        :CCHolderFirstName => paymentInstrument.first_name,
+                        :CCHolderLastName => paymentInstrument.last_name,
+                        # Deepstack specific fields (not in CreditCard class)
+                        :CCBillingAddress => options.key?(:card_billing_address) ? options[:card_billing_address] : "",
+                        :CCBillingZip => options.key?(:card_billing_zipcode) ? options[:card_billing_zipcode] : "",
+                        :CCBillingCity => options.key?(:card_billing_city) ? options[:card_billing_city] : "",
+                        :CCBillingState => options.key?(:card_billing_state) ? options[:card_billing_state] : "",
+                        :CCBillingCountry => options.key?(:card_billing_country) ? options[:card_billing_country] : ""
                     }
                 else
                     {
-
+                        :ccnumber => paymentInstrument,
+                        :ccexp => options[:ccexp],
+                        # :CCBillingAddress => options.key?(:card_billing_address) ? options[:card_billing_address] : "",
+                        :CCBillingZip => options.key?(:card_billing_zipcode) ? options[:card_billing_zipcode] : "",
+                        # :CCBillingCity => options.key?(:card_billing_city) ? options[:card_billing_city] : "",
+                        # :CCBillingState => options.key?(:card_billing_state) ? options[:card_billing_state] : "",
+                        # :CCBillingCountry => options.key?(:card_billing_country) ? options[:card_billing_country] : ""
                     }
                 end
             end
@@ -192,6 +215,13 @@ module ActiveMerchant #nodoc
                 params.merge({"transactiontype" => type})
             end
 
+            def success_from(response)
+                return response.code != 200
+            end
+
+            def message_from(response)
+                return response.body["status"]
+            end
         end
     end
 end

@@ -28,9 +28,15 @@ class DeepstackTest < Test::Unit::TestCase
     end
 
     def test_setup
-        # @gateway.getToken(@credit_card, @options)
+        response = @gateway.getToken(@credit_card, @options)
+        assert_success response
+        # puts response.params["responsecode"]
+        assert response.params["responsecode"] == "00"
+        response = @gateway.getToken(@credit_card)
+        assert response.params["responsecode"] == "00"
+        # puts response.params["clienttransdescription"]
         # @gateway.authorize(10.25,@credit_card, @options)
-        assert 1==1
+        assert_success response
     end
 
     def test_auth
@@ -47,19 +53,40 @@ class DeepstackTest < Test::Unit::TestCase
         }
         testOptions = @options.merge(shipping)
         client = {
-            :clientInfo => {
+            :client_info => {
                 :trans_id => "1237485",
                 :invoice_id => "125478",
                 :client_trans_description => "sale transaction"
             }
         }
         testOptions = testOptions.merge(client)
-        @gateway.authorize(10.25, @credit_card, testOptions)
+        response = @gateway.authorize(10.25, @credit_card, testOptions)
+        assert_success response
+        assert response.params["responsecode"] == "00"
+
+
+        testOptions = testOptions.merge({
+            :ccexp => "0127"
+        })
+        token = @gateway.getToken(@credit_card, @options).params["clienttransdescription"]
+        response = @gateway.authorize(10.25, token, testOptions)
+        assert_success response
+        puts response.params.to_json
+        assert response.params["responsecode"] == "00"
+
     end
 
     def test_refund
         transactionID = "1918436551"
-        @gateway.refund(0.02, transactionID, @options)
-        assert 1==1 
+        response = @gateway.refund(0.02, transactionID, @options)
+        assert_success response
+        assert response.params["responsecode"] == "00" 
+    end
+
+    def test_capture
+        transactionID = "1918436551"
+        response = @gateway.refund(10.25, transactionID)
+        assert_success response
+        assert response.params["responsecode"] == "00"
     end
 end

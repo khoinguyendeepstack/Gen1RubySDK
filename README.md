@@ -59,17 +59,18 @@ For a working example of usage, please visit [Globally Paid Ruby SDK example](ht
 
 # Documentation
 
+
+## Deepstack
+
 ## Initialize the Client
 
-```ruby
-gateway = ActiveMerchant::Billing::GloballyPaidGateway.new(
-        :publishable_api_key => 'T0FL5VDNQRK0V6H1Z6S9H2WRP8VKIVWO', 
-        :app_id => '6652820b-6a7a-4d36-bc32-786e49da1cbd', 
-        :shared_secret => 'ME1uVox0hrk7i87e7kbvnID38aC2U3X8umPH0D+BsVA=', 
-        :sandbox => true)
+``` ruby
+gateway = ActiveMerchant::Billing::Deepstack.new(
+  :client_id => 'clientID',
+  :api_username => 'username',
+  :api_password => 'password'
+)
 ```
-
-## API 
 
 ### Setting up a credit card 
 
@@ -85,166 +86,95 @@ credit_card = ActiveMerchant::Billing::CreditCard.new(
                 :verification_value => '000')
 ```
 
-### Make a Instant Charge Sale Transaction
+### Getting a token
 
 ```ruby
-# ActiveMerchant accepts all amounts as Integer values in cents
-amount = 1000  # $10.00
-
-# The card verification value is also known as CVV2, CVC2, or CID
-if credit_card.validate.empty?
-  # Capture $10 from the credit card
-  response = gateway.charge(amount, credit_card)
-
-  if response.success?
-    puts "Successfully charged $#{sprintf("%.2f", amount / 100)} to the credit card #{credit_card.display_number}"
-  else
-    raise StandardError, response.message
-  end
-end
+options = {
+  #optional fields
+  #Defaulted to ""
+  :employee_id = 'employee_id',
+  :card_billing_address = 'card_billing_address',
+  :card_billing_zipcode = 'card_billing_zipcode',
+  :card_billing_city = 'some city',
+  :card_billing_state = 'CA',
+  :card_billing_country = 'US'
+}
+response = gateway.getToken(credit_card, options)
+token = response.params["clienttransdescription"]
 ```
 
-### Payment requests
-
-> Authorization
+### Authorization
 
 ```ruby
-# Authorizes and prepares the transaction for capturing
-#
-#   money - amount of money in cents
-#   payment - credit card or other instrument
-#   options - customer data      
-auth = @gateway.authorize(@amount, @credit_card, @options)
+options = {
+  #optional fields
+  #Defaulted to ""
+  :employee_id = 'employee_id',
+  :card_billing_address = 'card_billing_address',
+  :card_billing_zipcode = 'card_billing_zipcode',
+  :card_billing_city = 'some city',
+  :card_billing_state = 'CA',
+  :card_billing_country = 'US'
+  #shipping defaulted to ""
+  :shipping =>{
+    :first_name => 'John',
+    :last_name => 'Doe',
+    :city => 'some city',
+    :zip => '12345',
+    :country => 'US',
+    :phone => '1234567890',
+    :email => 'johnDoe@gmail.com'
+  },
+  #Default value "y"
+  :avs => 'y',
+  #Default Values "USD"
+  :iso_country_code => "USD",
+  :iso_currency_code => "USD",
+  #Optional internal fields
+  :client_info => {
+    :trans_id => '12345',
+    :invoice_id => '6789',
+    :client_trans_description => 'testing'
+  }
+
+}
+response = gateway.authorize(amount, paymentInstrument, options)
+# Response codes
+responseCode = response.params["responsecode"]
+responseText = response.params["responsetext"]
+cvvResponse = response.params["cvvresponse"]
+avsResponse = response.params["avsresponse"]
+# Transaction ID
+transactionID = response.params["anatransactionid"]
+```
+### Capture
+
+``` ruby
+# Amount in dollars
+amount = 10.25
+# Transaction ID from Auth
+response = gateway.capture(amount, transactionID)
+# Response codes
+responseCode = response.params["responsecode"]
+responseText = response.params["responsetext"]
 ```
 
-> Capture
+### Refund
 
 ```ruby
-# Capture authorized transaction
-#
-#   money - amount of money in cents
-#   authorization - authorized transaction
-#   options - customer data        
-response = @gateway.capture(money, authorization, options={})
-```
-
-> Refund
-
-```ruby
-# Refund authorized transaction
-#
-#   money - amount of money in cents
-#   authorization - authorized transaction
-#   options - customer data        
-response = gateway.refund(amount)
-```
-
-### Customer requests
-
-> Listing customers
-
-```ruby
-# List customers
-#
-#   Returns a list of customer objects
-customers = @gateway.list_customers()
-```
-
-> Fetching a customer
-
-```ruby
-# Get the customer 
-#
-#   customer_id - the id of the customer
-customer = get_customer(customer_id)
-```
-
-> Creating a customer
-
-```ruby
-# Create customer
-#
-#   customer - customer object
-#   
-#   Returns the newly created customer object
-customer = @gateway.create_customer(customer)
-```
-
-> Updating a customer
-
-```ruby
-# Update customer
-#
-#   customer_id - the id of the customer
-#   options - updated customer fields
-updated_customer = @gateway.update_customer(customer_id, options={})
-```
-
-> Deleting a customer
-
-```ruby
-# Delete customer
-#
-#   customer_id - the id of the customer
-result = @gateway.delete_customer(customer_id)
+# Amount in dollars
+amount = 10.25
+# Transaction ID from Auth
+response = gateway.refund(amount, transactionID)
+# Response codes
+responseCode = response.params["responsecode"]
+responseText = response.params["responsetext"]
 ```
 
 
-### Payment instrument requests
 
-> Listing payment instruments
+## End Deepstack
 
-```ruby
-# List payment instruments      
-#
-#   customer_id - the id of the customer for whom we fetch the payment instruments
-#
-#   Return list of payment instrument objects
-payment_instruments = @gateway.list_payment_instruments(customer_id)
-```
-
-> Fetching a payment instrument
-
-```ruby
-# Get the payment instrument
-#
-#   paymentinstrument_id - the id of the payment instrument
-#
-#   Returns the payment instrument object
-payment_instrument = @gateway.get_paymentinstrument(paymentinstrument_id)
-```
-
-> Creating a payment instrument
-
-```ruby
-# Create payment instrument for a customer
-#
-#   paymentinstrment - payment instrument object
-#   customer_id - the id of the payment instrument's customer
-#   
-#   Returns the newly created payment instrument object
-payment_instrument = @gateway.create_paymentinstrument(paymentinstrument, customer_id)
-```
-
-> Updating a payment instrument
-```ruby
-# Update payment instrument
-#
-#   paymentinstrument_id - the id of the payment instrument
-#   options - updated fields
-payment_instrument = @gateway.update_paymentinstrument(paymentinstrument_id, options={})
-```
-
-> Deleting a payment instrument
-
-```ruby
-# Delete payment instrument
-#
-#   paymentinstrument_id - the id of the payment instrument
-#
-#   Returns the result of the operation
-result = @gateway.delete_paymentinstrument(paymentinstrument_id)
-```
 
 ## Testing
 
