@@ -43,6 +43,21 @@ gem 'activemerchant'
 
 ## Usage
 
+
+## Deepstack
+
+## Initialize the Client
+
+``` ruby
+gateway = ActiveMerchant::Billing::Deepstack.new(
+  :client_id => 'clientID',
+  :api_username => 'username',
+  :api_password => 'password'
+)
+```
+
+## End Deepstack
+
 This simple example demonstrates how a purchase can be made using a person's
 credit card details.
 
