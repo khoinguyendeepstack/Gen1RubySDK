@@ -114,6 +114,7 @@ module ActiveMerchant #nodoc
             end
 
             # Take params -> create request -> send request
+            # Take hash of parameters and convert into url-encoded before sending request
             def commit(params)
                 begin
                     headers = getHeaders()
@@ -139,13 +140,19 @@ module ActiveMerchant #nodoc
                     )
 
                 rescue ResponseError => e
-                    puts "ruh roh"
+                    puts "Caught error: "
+                    ap e.response.message
+                    Response.new(
+                        e.response.code.to_i,
+                        e.response.body.
+                        {}
+                    )
                 end
 
             end
 
             # Helper functions
-
+            # convert url-encoded response into JSON
             def parseResponse(response)
                 useFullResponse = response.body[0,response.body.index("\n")]
                 URI.decode_www_form(useFullResponse).to_h.to_json
@@ -214,12 +221,14 @@ module ActiveMerchant #nodoc
                     }
                 else
                     {
+                        # Required Fields
                         :ccnumber => paymentInstrument,
                         :ccexp => options[:ccexp],
                         :CCBillingAddress => options[:card_billing_address],
                         :CCBillingZip => options[:card_billing_zipcode],
                         # :CCBillingAddress => options.key?(:card_billing_address) ? options[:card_billing_address] : "",
                         # :CCBillingZip => options.key?(:card_billing_zipcode) ? options[:card_billing_zipcode] : "",
+                        # Optional Fields
                         :CCBillingCity => options.key?(:card_billing_city) ? options[:card_billing_city] : "",
                         :CCBillingState => options.key?(:card_billing_state) ? options[:card_billing_state] : "",
                         :CCBillingCountry => options.key?(:card_billing_country) ? options[:card_billing_country] : ""
