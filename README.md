@@ -30,32 +30,51 @@ The official GloballyPaid Ruby client library.
 
 > ActiveMerchant 1.110 or later
 
-## Bundler
+## Installation ##
 
-The library will be built as a gem and can be referenced in the Gemfile with:
+## Bundling from Git ##
 
-```ruby
-gem 'active-merchant-globally-paid-gateway'
+We can add the repo as a gem using bundler. Based on Ruby configuration, this could install the gem into a bundler folder instead of the system's gems folder meaning that programs will need to be run with `bundle exec ruby FILE.rb` so that bundler is able to use the gem.
+
+```Gemfile 
+source 'http://rubygems.org'
+
+gem 'activemerchant', :github => 'khoinguyendeepstack/Gen1RubySDK'
+gem 'rexml'
+gem 'jruby-openssl', platforms: :jruby
+gem 'rubocop', require: false
+gem 'awesome_print'
 ```
 
-## Manual Installation
+```bash
+bundle install
+bundle exec ruby FILE.rb
+```
+Don't forget to include `require 'activemerchant'` in the file using the gem.
 
-The library can be also referenced locally
+## Locally installing gem ##
 
-```ruby
-gem 'active-merchant-globally-paid-gateway', :local => '/path/to/the/library'
+
+Installing the gem this way places the gem directly with other gems so that bundler is not required when running scripts. 
+
+Clone the repository and run the following to locally install the gem
+
+``` bash
+git clone https://github.com/khoinguyendeepstack/Gen1RubySDK.git
 ```
 
-or from a github repository:
-
-```ruby
-gem 'active-merchant-globally-paid-gateway', :github => 'user/repo'
+```bash
+cd active_merchant
+gem build activemerchant.gemspec
+gem install ./pkg/activemerchant-1.117.0.gem
 ```
 
-## Example
+Alternatively we can use rake
 
-For a working example of usage, please visit [Globally Paid Ruby SDK example](https://github.com/globallypaid/globallypaid-sdk-ruby-samples).
-
+```bash
+cd active_merchant
+rake install:local
+```
 
 # Documentation
 

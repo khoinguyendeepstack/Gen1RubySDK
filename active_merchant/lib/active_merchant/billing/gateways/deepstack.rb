@@ -1,5 +1,5 @@
 require 'json'
-require 'awesome_print'
+# require 'awesome_print'
 require 'base64'
 
 require 'uri'
