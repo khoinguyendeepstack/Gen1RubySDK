@@ -10,7 +10,7 @@ require 'net/https'
 
 module ActiveMerchant #nodoc
     module Billing
-        class Deepstack < Gateway
+        class DeepstackGateway < Gateway
 
             self.test_url = 'https://sandbox.transactions.gpgway.com/'
             self.live_url = 'some_url'
@@ -144,7 +144,7 @@ module ActiveMerchant #nodoc
                     ap e.response.message
                     Response.new(
                         e.response.code.to_i,
-                        e.response.body.
+                        e.response.body,
                         {}
                     )
                 end
