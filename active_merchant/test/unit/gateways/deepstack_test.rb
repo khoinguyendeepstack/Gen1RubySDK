@@ -6,7 +6,7 @@ require 'json'
 class DeepstackTest < Test::Unit::TestCase
     def setup
         hash = Psych.load_file('./test/fixtures.yml', aliases: true)
-        @gateway = ActiveMerchant::Billing::Deepstack.new(
+        @gateway = ActiveMerchant::Billing::DeepstackGateway.new(
             :client_id => hash['deepstack']['client_id'],
             :api_username => hash['deepstack']['api_username'],
             :api_password => hash['deepstack']['api_password']
