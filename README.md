@@ -9,16 +9,17 @@ The official GloballyPaid Ruby client library.
 
 - [Ruby SDK](#ruby-sdk)
   - [Requirements](#requirements)
-  - [Bundler](#bundler)
-  - [Manual Installation](#manual-installation)
+  - [Installation](#installation)
+  - [Bundling from Git](#bundling-from-git)
+  - [Locally installing Gem](#locally-installing-gem)
 - [Documentation](#documentation)
   - [Initialize the Client](#initialize-the-client)
   - [API](#api)
     - [Setting up a credit card](#setting-up-a-credit-card)
-    - [Make a Instant Charge Sale Transaction](#make-a-instant-charge-sale-transaction)
-    - [Payment requests](#payment-requests)
-    - [Customer requests](#customer-requests)
-    - [Payment instrument requests](#payment-instrument-requests)
+    - [Getting a token](#getting-a-token)
+    - [Authorization](#authorization)
+    - [Capture](#capture)
+    - [Refund](#refund)
   - [Testing](#testing)
 
 <!-- /code_chunk_output -->
@@ -79,7 +80,7 @@ rake install:local
 # Documentation
 
 
-## Deepstack
+## API
 
 ## Initialize the Client
 
@@ -90,6 +91,8 @@ gateway = ActiveMerchant::Billing::Deepstack.new(
   :api_password => 'password'
 )
 ```
+
+## API
 
 ### Setting up a credit card 
 
@@ -235,44 +238,7 @@ responseText = response.params["responsetext"]
 ## End Deepstack
 
 
-## Testing
 
-There are two types of unit tests for each gateway.  The first are the normal unit tests, which test the normal functionality of the gateway, and use "Mocha":http://mocha.rubyforge.org/ to stub out any communications with live servers.
-
-The second type are the remote unit tests.  These use real test accounts, if available, and communicate with the test servers of the payments gateway.  These are critical to having confidence in the implementation of the gateway.  If the gateway doesn't have a global public test account then you should remove your private test account credentials from the file before submitting your patch.
-
-To run tests:
-
-```bash
-$ bundle install
-$ bundle exec rake test:local   #Runs `test:units` and `rubocop`. All these tests should pass.
-$ bundle exec rake test:remote  #Will not pass without updating test/fixtures.yml with credentials
-```
-
-To run a test suite individually:
-
-```bash
-$ bundle exec rake test:units TEST=test/unit/gateways/globally_paid_test.rb
-$ bundle exec rake test:remote TEST=test/remote/gateways/remote_globally_paid_test.rb
-```
-
-To run a specific test case use the `-n` flag:
-
-```bash
-$ ruby -Itest test/remote/gateways/remote_globally_paid_test.rb -n test_successful_purchase
-```
-
-It is useful to work on remote tests first, both because they're less complex (no mocking/stubbing) and because you can capture the request/response easily which can then be copied to the unit tests. To capture the actual HTTP request sent and response received, use the `DEBUG_ACTIVE_MERCHANT` environment variable.
-
-```bash
-$ DEBUG_ACTIVE_MERCHANT=true ruby -Itest test/remote/gateways/remote_globally_paid_test.rb -n test_successful_purchase
-<- "POST /api/v1/capture....
-<- "<?xml version=\"1.0\" ..."
--> "HTTP/1.1 200 OK\r\n"
--> "Content-Type: text/xml;charset=ISO-8859-1\r\n"
--> "Content-Length: 954\r\n"
-...
-```
 
 
 
