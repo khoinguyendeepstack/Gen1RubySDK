@@ -13,7 +13,7 @@ module ActiveMerchant #nodoc
         class DeepstackGateway < Gateway
 
             self.test_url = 'https://sandbox.transactions.gpgway.com/'
-            self.live_url = 'some_url'
+            self.live_url = 'https://salecctxngpg.net/default.aspx'
             self.supported_countries = ['US']
             self.default_currency = 'USD'
             self.supported_cardtypes = [:visa, :master, :american_express, :discover]
@@ -121,6 +121,8 @@ module ActiveMerchant #nodoc
                     myURI = @isProduction ? self.live_url : self.test_url
                     # puts myURI
                     # Unsure if this approach uses SSL handshake
+
+
                     uri = URI(myURI)
                     https = Net::HTTP.new(uri.host, uri.port)
                     https.use_ssl = true
@@ -131,6 +133,10 @@ module ActiveMerchant #nodoc
                         raise "Bad request... code:  " + response.code + " message: " + response.message
                     end
                     # puts response.body
+
+                    # This doesn't work because Gen1 uses url encode instead of a body...
+                    # response = ssl_post(myURI, URI.encode_www_form(params), headers)
+
                     oResponse = parseResponse(response)
                     # puts oResponse
                     Response.new(

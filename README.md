@@ -29,7 +29,6 @@ The official GloballyPaid Ruby client library.
 
 > Ruby 2.4.0 or later
 
-> ActiveMerchant 1.110 or later
 
 ## Installation ##
 

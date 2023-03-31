@@ -40,6 +40,23 @@ class DeepstackTest < Test::Unit::TestCase
     end
 
     def test_auth
+        # shipping = {
+        #     :shipping => {
+        #         :first_name => "",
+        #         :last_name => "",
+        #         :city => "",
+        #         :zip => "",
+        #         :country => "",
+        #         :phone => "",
+        #         :email => ""
+        #     }
+        # }
+        # testOptions = @options.merge(shipping)
+
+
+        response = @gateway.authorize(10.25, @credit_card, @options)
+        assert response.params["responsecode"] == "00"
+
         shipping = {
             :shipping => {
                 :first_name => "",
@@ -52,6 +69,13 @@ class DeepstackTest < Test::Unit::TestCase
             }
         }
         testOptions = @options.merge(shipping)
+
+        #Test auth with shipping
+        response = @gateway.authorize(10.25, @credit_card, testOptions)
+        assert response.params["responsecode"] == "00"
+
+
+        # Test auth with shipping + client info
         client = {
             :client_info => {
                 :trans_id => "1237485",
