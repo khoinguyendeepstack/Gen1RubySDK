@@ -119,8 +119,6 @@ module ActiveMerchant #nodoc
                 begin
                     headers = getHeaders()
                     myURI = @isProduction ? self.live_url : self.test_url
-                    # puts myURI
-                    # Unsure if this approach uses SSL handshake
 
 
                     uri = URI(myURI)
@@ -132,13 +130,11 @@ module ActiveMerchant #nodoc
                     if response.code != "200"
                         raise "Bad request... code:  " + response.code + " message: " + response.message
                     end
-                    # puts response.body
 
                     # This doesn't work because Gen1 uses url encode instead of a body...
                     # response = ssl_post(myURI, URI.encode_www_form(params), headers)
 
                     oResponse = parseResponse(response)
-                    # puts oResponse
                     Response.new(
                         success_from(response),
                         message_from(response),
