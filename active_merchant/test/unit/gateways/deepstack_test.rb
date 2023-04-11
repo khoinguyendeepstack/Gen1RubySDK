@@ -59,7 +59,7 @@ class DeepstackTest < Test::Unit::TestCase
 
         shipping = {
             :shipping => {
-                :first_name => "",
+                :first_name => "Khoi",
                 :last_name => "",
                 :city => "",
                 :zip => "",
@@ -111,6 +111,11 @@ class DeepstackTest < Test::Unit::TestCase
         transactionID = "1918436551"
         response = @gateway.refund(10.25, transactionID)
         assert_success response
+        assert response.params["responsecode"] == "00"
+    end
+
+    def test_sale
+        response = @gateway.sale(10.25, @credit_card, @options)
         assert response.params["responsecode"] == "00"
     end
 end

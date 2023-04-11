@@ -64,16 +64,37 @@ module ActiveMerchant #nodoc
                 params = params.merge(addPaymentInstrument(paymentInstrument, options))
                 params = addAmount(params, amount, options)
                 params = addTransactionType(params, "auth")
-                if options.key?(:employee_id)
-                    params = addEmployeeID(params, options)
-                end
-                if options.key?(:shipping)
-                    params = addShipping(params, options)
-                end
-                if options.key?(:client_info)
-                    params = addClient(params, options)
-                end
+                params = addEmployeeID(params, options)
+                params = addShipping(params, options)
+                params = addClient(params, options)
+                params = addCCHolderIPAddress(params, options)
+                params = addDeviceSessionID(params, options)
+                
                 # puts params.to_json
+                commit(params)
+            end
+
+            # Authorize/Capture in one action
+            # Arguments:
+            #   amount: amount to authorize in dollar format
+            #   paymentInstrument: either a CreditCard object or string for token
+            #   options: hash of required and optional fields for authorization
+            # Output:
+            #   response.params["anatransactionid"] : transaction ID used for refund/charge
+            #   response.params["responsecode"] : "00" for success
+            #   response.params["responsetext"] : transaction message (either successful or reason why not)
+            def sale(amount, paymentInstrument, options={})
+                params = {}
+                params = addCredentials(params)
+                params = params.merge(addPaymentInstrument(paymentInstrument, options))
+                params = addAmount(params, amount, options)
+                params = addTransactionType(params, "sale")
+                params = addEmployeeID(params, options)
+                params = addShipping(params, options)
+                params = addClient(params, options)
+                params = addCCHolderIPAddress(params, options)
+                params = addDeviceSessionID(params, options)
+                
                 commit(params)
             end
 
@@ -119,7 +140,7 @@ module ActiveMerchant #nodoc
                 begin
                     headers = getHeaders()
                     myURI = @isProduction ? self.live_url : self.test_url
-
+                    puts params
 
                     uri = URI(myURI)
                     https = Net::HTTP.new(uri.host, uri.port)
@@ -161,12 +182,16 @@ module ActiveMerchant #nodoc
             end
 
             def addClient(params, options)
-                client = options[:client_info]
-                params.merge({
-                    :clienttransid => client.key?(:trans_id) ? client[:trans_id] : "",
-                    :clientinvoiceid => client.key?(:invoice_id) ? client[:invoice_id] : "",
-                    :clienttransdescription => client.key?(:client_trans_description) ? client[:client_trans_description] : ""
-                })
+                if options.key?(:client_info)
+                    client = options[:client_info]
+                    params.merge({
+                        :clienttransid => client.key?(:trans_id) ? client[:trans_id] : "",
+                        :clientinvoiceid => client.key?(:invoice_id) ? client[:invoice_id] : "",
+                        :clienttransdescription => client.key?(:client_trans_description) ? client[:client_trans_description] : ""
+                    })
+                else
+                    params
+                end
             end
 
             def addAmount(params, amount)
@@ -186,16 +211,20 @@ module ActiveMerchant #nodoc
             end
 
             def addShipping(params, options)
-                shipping = options[:shipping]
-                params.merge({
-                    :ShippingFirstName => shipping.key?(:first_name) ? shipping[:first_name] : "",
-                    :ShippingLastName => shipping.key?(:last_name) ? shipping[:last_name] : "",
-                    :ShippingCity => shipping.key?(:city) ? shipping[:city] : "",
-                    :ShippingZip => shipping.key?(:zip) ? shipping[:zip] : "",
-                    :ShippingCountry => shipping.key?(:country) ? shipping[:country] : "",
-                    :ShippingPhone => shipping.key?(:phone) ? shipping[:phone] : "",
-                    :ShippingEmail => shipping.key?(:email) ? shipping[:email] : ""
-                })
+                if options.key?(:shipping)
+                    shipping = options[:shipping]
+                    params.merge({
+                        :ShippingFirstName => shipping.key?(:first_name) ? shipping[:first_name] : "",
+                        :ShippingLastName => shipping.key?(:last_name) ? shipping[:last_name] : "",
+                        :ShippingCity => shipping.key?(:city) ? shipping[:city] : "",
+                        :ShippingZip => shipping.key?(:zip) ? shipping[:zip] : "",
+                        :ShippingCountry => shipping.key?(:country) ? shipping[:country] : "",
+                        :ShippingPhone => shipping.key?(:phone) ? shipping[:phone] : "",
+                        :ShippingEmail => shipping.key?(:email) ? shipping[:email] : ""
+                    })
+                else
+                    params
+                end
             end
 
             def addCredentials(params)
@@ -245,7 +274,27 @@ module ActiveMerchant #nodoc
             end
 
             def addEmployeeID(params, options)
-                params.merge({:employeeid => options[:employee_id]})
+                if options.key?(:employee_id)
+                    params.merge({:employeeid => options[:employee_id]})
+                else
+                    params
+                end
+            end
+
+            def addCCHolderIPAddress(params, options)
+                if options.key?(:cc_ip_address)
+                    params.merge({:CCHolderIPAddress => options[:cc_ip_address]})
+                else
+                    params
+                end
+            end
+
+            def addDeviceSessionID(params, options)
+                if options.key?(:device_session_id)
+                    params.merge({:DeviceSessionID => options[:device_session_id]})
+                else
+                    params
+                end
             end
 
             def getHeaders()
