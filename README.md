@@ -157,8 +157,9 @@ options = {
     :trans_id => '12345',
     :invoice_id => '6789',
     :client_trans_description => 'testing'
-  }
-
+  },
+  :cc_ip_address => 'ip_of_cardholder',
+  :device_session_id => 'device_session_id'
 }
 response = gateway.authorize(amount, paymentInstrument, options)
 # Response codes
@@ -204,9 +205,108 @@ options = {
     :trans_id => '12345',
     :invoice_id => '6789',
     :client_trans_description => 'testing'
-  }
+  },
+  :cc_ip_address => 'ip_of_cardholder',
+  :device_session_id => 'device_session_id'
 }
 ```
+
+### Sale (Authorize + Capture)
+
+Sale with card
+```ruby
+options = {
+  # Required fields
+  :card_billing_address = 'card_billing_address',
+  :card_billing_zipcode = 'card_billing_zipcode',
+  # optional fields
+  # Defaulted to ""
+  :employee_id = 'employee_id',
+  :card_billing_city = 'some city',
+  :card_billing_state = 'CA',
+  :card_billing_country = 'US'
+  #shipping defaulted to ""
+  :shipping =>{
+    :first_name => 'John',
+    :last_name => 'Doe',
+    :city => 'some city',
+    :zip => '12345',
+    :country => 'US',
+    :phone => '1234567890',
+    :email => 'johnDoe@gmail.com'
+  },
+  #Default value "y"
+  :avs => 'y',
+  #Default Values "USD"
+  :iso_country_code => "USD",
+  :iso_currency_code => "USD",
+  #Optional internal fields
+  :client_info => {
+    :trans_id => '12345',
+    :invoice_id => '6789',
+    :client_trans_description => 'testing'
+  },
+  :cc_ip_address => 'ip_of_cardholder',
+  :device_session_id => 'device_session_id'
+}
+response = gateway.sale(amount, paymentInstrument, options)
+# Response codes
+responseCode = response.params["responsecode"]
+responseText = response.params["responsetext"]
+cvvResponse = response.params["cvvresponse"]
+avsResponse = response.params["avsresponse"]
+# Transaction ID
+transactionID = response.params["anatransactionid"]
+```
+
+Sale with token
+
+```ruby
+options = {
+  # Required
+  :ccexp => "mmYY", #card expiration in mmYY
+  :card_billing_address = 'card_billing_address',
+  :card_billing_zipcode = 'card_billing_zipcode',
+  # Optional fields
+  #Defaulted to ""
+  :employee_id = 'employee_id',
+  :card_billing_city = 'some city',
+  :card_billing_state = 'CA',
+  :card_billing_country = 'US'
+  #shipping defaulted to ""
+  :shipping =>{
+    :first_name => 'John',
+    :last_name => 'Doe',
+    :city => 'some city',
+    :zip => '12345',
+    :country => 'US',
+    :phone => '1234567890',
+    :email => 'johnDoe@gmail.com'
+  },
+  #Default value "y"
+  :avs => 'y',
+  #Default Values "USD"
+  :iso_country_code => "USD",
+  :iso_currency_code => "USD",
+  #Optional internal fields
+  :client_info => {
+    :trans_id => '12345',
+    :invoice_id => '6789',
+    :client_trans_description => 'testing'
+  },
+  :cc_ip_address => 'ip_of_cardholder',
+  :device_session_id => 'device_session_id'
+}
+response = gateway.sale(amount, paymentInstrument, options)
+# Response codes
+responseCode = response.params["responsecode"]
+responseText = response.params["responsetext"]
+cvvResponse = response.params["cvvresponse"]
+avsResponse = response.params["avsresponse"]
+# Transaction ID
+transactionID = response.params["anatransactionid"]
+```
+
 
 ### Capture
 
