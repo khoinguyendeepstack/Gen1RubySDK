@@ -1,6 +1,6 @@
 # Ruby SDK
 
-The official GloballyPaid Ruby client library.
+The official DeepStack Ruby client library.
 
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
@@ -19,6 +19,7 @@ The official GloballyPaid Ruby client library.
     - [Getting a token](#getting-a-token)
     - [Authorization](#authorization)
     - [Capture](#capture)
+    - [Sale](#sale)
     - [Refund](#refund)
   - [Testing](#testing)
 
@@ -211,7 +212,7 @@ options = {
 }
 ```
 
-### Sale (Authorize + Capture)
+### Sale
 
 Sale with card
 ```ruby
