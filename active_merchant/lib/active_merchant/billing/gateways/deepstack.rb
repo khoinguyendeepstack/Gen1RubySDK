@@ -204,7 +204,7 @@ module ActiveMerchant #nodoc
                 # Want to add amount here and also CountryCode and CurrencyCode (defaulted to US)
                 params.merge({
                     :amount => amount,
-                    :isocountrycode => options.key?(:iso_country_code) ? options[:iso_country_code] : "USD",
+                    :isocountrycode => options.key?(:iso_country_code) ? options[:iso_country_code] : "USA",
                     :isocurrencycode => options.key?(:iso_currency_code) ? options[:iso_currency_code] : "USD",
                     :avs => options.key?(:avs) ? options[:avs] : "y"
                 })

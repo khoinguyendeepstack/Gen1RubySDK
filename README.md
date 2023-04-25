@@ -151,7 +151,7 @@ options = {
   #Default value "y"
   :avs => 'y',
   #Default Values "USD"
-  :iso_country_code => "USD",
+  :iso_country_code => "USA",
   :iso_currency_code => "USD",
   #Optional internal fields
   :client_info => {
@@ -199,7 +199,7 @@ options = {
   #Default value "y"
   :avs => 'y',
   #Default Values "USD"
-  :iso_country_code => "USD",
+  :iso_country_code => "USA",
   :iso_currency_code => "USD",
   #Optional internal fields
   :client_info => {
@@ -239,7 +239,7 @@ options = {
   #Default value "y"
   :avs => 'y',
   #Default Values "USD"
-  :iso_country_code => "USD",
+  :iso_country_code => "USA",
   :iso_currency_code => "USD",
   #Optional internal fields
   :client_info => {
@@ -287,7 +287,7 @@ options = {
   #Default value "y"
   :avs => 'y',
   #Default Values "USD"
-  :iso_country_code => "USD",
+  :iso_country_code => "USA",
   :iso_currency_code => "USD",
   #Optional internal fields
   :client_info => {
