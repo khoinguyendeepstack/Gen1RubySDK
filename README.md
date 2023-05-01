@@ -19,7 +19,7 @@ The official DeepStack Ruby client library.
     - [Getting a token](#getting-a-token)
     - [Authorization](#authorization)
     - [Capture](#capture)
-    - [Sale](#sale)
+    - [Purchase](#purchase)
     - [Refund](#refund)
   - [Testing](#testing)
 
@@ -77,6 +77,10 @@ cd active_merchant
 rake install:local
 ```
 
+## Known gemfile issue
+
+If rexml is not being listed as a dependency and tests are not able to be run due to this issue, run `gem install rexml` as a temporary fix until activemerchant addresses this issue
+
 # Documentation
 
 
@@ -112,32 +116,42 @@ credit_card = ActiveMerchant::Billing::CreditCard.new(
 
 ```ruby
 options = {
-  #optional fields
   #Defaulted to ""
   :employee_id = 'employee_id',
-  :card_billing_address = 'card_billing_address',
-  :card_billing_zipcode = 'card_billing_zipcode',
-  :card_billing_city = 'some city',
-  :card_billing_state = 'CA',
-  :card_billing_country = 'US'
+  :billing_address => {
+    #Required
+    :address1 => "123 some st",
+    :zip => "12345",
+    #Optional
+    :city => "Irvine",
+    :state => "CA",
+    :country => "USA"
+  }
 }
 response = gateway.getToken(credit_card, options)
 token = response.params["clienttransdescription"]
 ```
 
 ### Authorization
+
+Note: Amount is specified in the cent amount i.e. 1025 => 10.25
+
 Authorization with card
 ```ruby
 options = {
   # Required fields
-  :card_billing_address = 'card_billing_address',
-  :card_billing_zipcode = 'card_billing_zipcode',
+  :billing_address => {
+    #Required
+    :address1 => "123 some st",
+    :zip => "12345",
+    #Optional
+    :city => "Irvine",
+    :state => "CA",
+    :country => "USA"
+  }
   # optional fields
   # Defaulted to ""
   :employee_id = 'employee_id',
-  :card_billing_city = 'some city',
-  :card_billing_state = 'CA',
-  :card_billing_country = 'US'
   #shipping defaulted to ""
   :shipping =>{
     :first_name => 'John',
@@ -150,7 +164,7 @@ options = {
   },
   #Default value "y"
   :avs => 'y',
-  #Default Values "USD"
+  #Default Values "USA/USD"
   :iso_country_code => "USA",
   :iso_currency_code => "USD",
   #Optional internal fields
@@ -178,14 +192,18 @@ Authorization with token
 options = {
   # Required
   :ccexp => "mmYY", #card expiration in mmYY
-  :card_billing_address = 'card_billing_address',
-  :card_billing_zipcode = 'card_billing_zipcode',
+  :billing_address => {
+    #Required
+    :address1 => "123 some st",
+    :zip => "12345",
+    #Optional
+    :city => "Irvine",
+    :state => "CA",
+    :country => "USA"
+  }
   # Optional fields
   #Defaulted to ""
   :employee_id = 'employee_id',
-  :card_billing_city = 'some city',
-  :card_billing_state = 'CA',
-  :card_billing_country = 'US'
   #shipping defaulted to ""
   :shipping =>{
     :first_name => 'John',
@@ -212,20 +230,26 @@ options = {
 }
 ```
 
-### Sale
+### Purchase
 
-Sale with card
+Note: Amount is specified in the cent amount i.e. 1025 => 10.25
+
+Purchase with card
 ```ruby
 options = {
   # Required fields
-  :card_billing_address = 'card_billing_address',
-  :card_billing_zipcode = 'card_billing_zipcode',
+  :billing_address => {
+    #Required
+    :address1 => "123 some st",
+    :zip => "12345",
+    #Optional
+    :city => "Irvine",
+    :state => "CA",
+    :country => "USA"
+  }
   # optional fields
   # Defaulted to ""
   :employee_id = 'employee_id',
-  :card_billing_city = 'some city',
-  :card_billing_state = 'CA',
-  :card_billing_country = 'US'
   #shipping defaulted to ""
   :shipping =>{
     :first_name => 'John',
@@ -250,7 +274,7 @@ options = {
   :cc_ip_address => 'ip_of_cardholder',
   :device_session_id => 'device_session_id'
 }
-response = gateway.sale(amount, paymentInstrument, options)
+response = gateway.purchase(amount, paymentInstrument, options)
 # Response codes
 responseCode = response.params["responsecode"]
 responseText = response.params["responsetext"]
@@ -260,20 +284,24 @@ avsResponse = response.params["avsresponse"]
 transactionID = response.params["anatransactionid"]
 ```
 
-Sale with token
+Purchase with token
 
 ```ruby
 options = {
   # Required
-  :ccexp => "mmYY", #card expiration in mmYY
-  :card_billing_address = 'card_billing_address',
-  :card_billing_zipcode = 'card_billing_zipcode',
+  :ccexp => "mmYY", #card expiration in mmYY,
+  :billing_address => {
+    #Required
+    :address1 => "123 some st",
+    :zip => "12345",
+    #Optional
+    :city => "Irvine",
+    :state => "CA",
+    :country => "USA"
+  }
   # Optional fields
   #Defaulted to ""
   :employee_id = 'employee_id',
-  :card_billing_city = 'some city',
-  :card_billing_state = 'CA',
-  :card_billing_country = 'US'
   #shipping defaulted to ""
   :shipping =>{
     :first_name => 'John',
@@ -298,7 +326,7 @@ options = {
   :cc_ip_address => 'ip_of_cardholder',
   :device_session_id => 'device_session_id'
 }
-response = gateway.sale(amount, paymentInstrument, options)
+response = gateway.purchase(amount, paymentInstrument, options)
 # Response codes
 responseCode = response.params["responsecode"]
 responseText = response.params["responsetext"]
@@ -311,9 +339,11 @@ transactionID = response.params["anatransactionid"]
 
 ### Capture
 
+Note: Amount is specified in the cent amount i.e. 1025 => 10.25
+
 ``` ruby
-# Amount in dollars
-amount = 10.25
+# Amount in cents
+amount = 1025
 # Transaction ID from Auth
 response = gateway.capture(amount, transactionID)
 # Response codes
@@ -321,11 +351,27 @@ responseCode = response.params["responsecode"]
 responseText = response.params["responsetext"]
 ```
 
-### Refund
+### Void
+
+Note: Amount is specified in the cent amount i.e. 1025 => 10.25
 
 ```ruby
-# Amount in dollars
-amount = 10.25
+# Amount in cents
+amount = 1025
+# Transaction ID from Auth
+response = gateway.void(amount, transactionID)
+# Response codes
+responseCode = response.params["responsecode"]
+responseText = response.params["responsetext"]
+```
+
+### Refund
+
+Note: Amount is specified in the cent amount i.e. 1025 => 10.25
+
+```ruby
+# Amount in cents
+amount = 1025
 # Transaction ID from Auth
 response = gateway.refund(amount, transactionID)
 # Response codes
@@ -334,6 +380,25 @@ responseText = response.params["responsetext"]
 ```
 
 
+# Testing #
+
+The Deepstack gateway uses the built-in active-merchant testing suite
+
+For running Deepstack specific tests follow below:
+
+## Unit tests (no requests made) ##
+
+From within the active_merchant folder
+
+``` bash
+ bundle exec rake test:units TEST=test/unit/gateways/deepstack_test.rb
+```
+
+## Remote tests (requests made to our sandbox endpoint) ##
+
+```bash
+ bundle exec rake test:remote TEST=test/remote/gateways/remote_deepstack_test.rb
+```
 
 ## End Deepstack
 
